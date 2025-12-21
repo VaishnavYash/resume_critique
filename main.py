@@ -50,21 +50,78 @@ def extract_text_from_file(uploaded_file):
 def read_local_txt(file_path: str) -> str:
     with open(file_path, "r", encoding="utf-8") as f:
         return f.read()
-    
+
+# Function to create prompt for AI
+def build_resume_analysis_prompt(
+    resume_text: str,
+    job_role: str,
+    target_company: str
+) -> str:
+    return f"""
+You are an expert ATS resume reviewer and senior hiring manager.
+
+Analyze the provided resume and return the response STRICTLY in valid JSON format.
+Do NOT include markdown, explanations, or any text outside the JSON.
+Do NOT wrap the JSON in code blocks.
+
+Follow this exact JSON structure and key names:
+
+{{
+  "ats_score": number (0–100),
+  "summary": string,
+  "analysis": [
+    {{
+      "Content Clarity and Impact": {{
+        "Strengths": [string, string],
+        "Areas of Improvement": [string, string]
+      }},
+      "Skills Presentation": {{
+        "Strengths": [string, string],
+        "Areas of Improvement": [string, string]
+      }},
+      "Experience Descriptions": {{
+        "Strengths": [string, string],
+        "Areas of Improvement": [string, string]
+      }},
+      "Specific Improvements for {job_role} at {target_company}": {{
+        "Technical Depth": [string, string],
+        "Project Descriptions": [string, string],
+        "Achievements": [string, string],
+        "Certifications": [string, string]
+      }},
+      "Overall Recommendations": {{
+        "Formatting": [string, string],
+        "Tailoring": [string, string],
+        "Proofreading": [string, string]
+      }}
+    }}
+  ]
+}}
+
+Rules:
+- All bullet points MUST be arrays of strings
+- Tailor recommendations specifically for the target company’s hiring standards and expectations
+- Keep points concise, actionable, and professional
+- Do not hallucinate personal details
+- Ensure valid, parsable JSON
+- Return ONLY JSON, nothing else
+
+Target Job Role:
+{job_role}
+
+Target Company:
+{target_company}
+
+Resume Content:
+{resume_text}
+""".strip()
+
+
 # Main function to get API response
 def getAPIResponse(file_content, job_role, company):
     try:
         # Create prompt for AI
-        prompt = f"""Please analyze this resume and provide consructive feedback.
-        Focus on the following aspects:
-        1. Content clarity and impact
-        2. Skills presentation
-        3. Experience descriptions
-        4. Specific improvements for {job_role}
-        
-        Resume Content: {file_content}
-        
-        Please Provide your analysis in a clear, structured format with specific recommendations. Also Provide ATS Score out of 100 at the Beginning."""
+        prompt = build_resume_analysis_prompt(file_content, job_role, company)
         
         client = OpenAI(api_key=openai_api_key)  # Initialize OpenAI client
         response = client.chat.completions.create(
