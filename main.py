@@ -52,28 +52,26 @@ def read_local_txt(file_path: str) -> str:
         return f.read()
     
 # Main function to get API response
-def getAPIResponse(file_content, job_role):
+def getAPIResponse(file_content, job_role, company):
     try:
-        
-        return file_content
         # Create prompt for AI
         prompt = f"""Please analyze this resume and provide consructive feedback.
         Focus on the following aspects:
         1. Content clarity and impact
         2. Skills presentation
         3. Experience descriptions
-        4. Specific improvements for {job_role if job_role else 'general job applications'}
+        4. Specific improvements for {job_role}
         
         Resume Content: {file_content}
         
-        Please Provide your analysis in a clear, structured format with specific recommendations."""
+        Please Provide your analysis in a clear, structured format with specific recommendations. Also Provide ATS Score out of 100 at the Beginning."""
         
         client = OpenAI(api_key=openai_api_key)  # Initialize OpenAI client
         response = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
                 # System message to set the context
-                {"role": "system", "content": "You are an expert resume reviewer with years of experience in HR and recruitment."}, 
+                {"role": "system", "content": f"You are an expert resume reviewer with years of experience in HR and recruitment and is recruiting in the Company {company}."}, 
                 
                 # User message with the prompt
                 {"role": "user", "content": prompt}
@@ -89,7 +87,8 @@ def getAPIResponse(file_content, job_role):
 @app.post("/analyze_resume_pdf")
 async def analyze_resume_pdf(
     resume: UploadFile = File(...),
-    job_role: str = Form("Software Engineer")
+    job_role: str = Form("Software Engineer"),
+    company: str = Form("Software Engineer")
 ):
     file_bytes = await resume.read()
     print("PDF size (bytes):", len(file_bytes))
@@ -103,4 +102,4 @@ async def analyze_resume_pdf(
             "hint": "PDF might be scanned/image-based"
         }
 
-    return getAPIResponse(text, job_role)
+    return getAPIResponse(text, job_role, company)
