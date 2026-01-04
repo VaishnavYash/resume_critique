@@ -58,7 +58,7 @@ def build_resume_analysis_prompt(
     target_company: str
 ) -> str:
     return f"""
-You are an expert ATS resume reviewer and senior hiring manager.
+You are an expert ATS resume reviewer and senior hiring manager in company {target_company}.
 
 Analyze the provided resume and return the response STRICTLY in valid JSON format.
 Do NOT include markdown, explanations, or any text outside the JSON.
@@ -69,48 +69,85 @@ Follow this exact JSON structure and key names:
 {{
   "ats_score": number (0–100),
   "summary": string,
-  "analysis": [
-    {{
-      "Content Clarity and Impact": {{
-        "Strengths": [string, string],
-        "Areas of Improvement": [string, string]
+  "analysis": {{
+    "Content Clarity and Impact": {{
+      "Strengths": {{
+        "data": [string, string, string],
+        "whyThisMatter": string
       }},
-      "Skills Presentation": {{
-        "Strengths": [string, string],
-        "Areas of Improvement": [string, string]
+      "Areas of Improvement": {{
+        "data": [string, string, string],
+        "whyThisMatter": string
+      }}
+    }},
+    "Skills Presentation": {{
+      "Strengths": {{
+        "data": [string, string, string],
+        "whyThisMatter": string
       }},
-      "Experience Descriptions": {{
-        "Strengths": [string, string],
-        "Areas of Improvement": [string, string]
+      "Areas of Improvement": {{
+        "data": [string, string, string],
+        "whyThisMatter": string
+      }}
+    }},
+    "Experience Descriptions": {{
+      "Strengths": {{
+        "data": [string, string, string],
+        "whyThisMatter": string
       }},
-      "Specific Improvements for {job_role} at {target_company}": {{
-        "Technical Depth": [string, string],
-        "Project Descriptions": [string, string],
-        "Achievements": [string, string],
-        "Certifications": [string, string]
+      "Areas of Improvement": {{
+        "data": [string, string, string],
+        "whyThisMatter": string
+      }}
+    }},
+    "Specific Improvements for {job_role} at {target_company}": {{
+      "Technical Depth": {{
+        "data": [string, string, string],
+        "whyThisMatter": string
       }},
-      "Overall Recommendations": {{
-        "Formatting": [string, string],
-        "Tailoring": [string, string],
-        "Proofreading": [string, string]
+      "Project Descriptions": {{
+        "data": [string, string, string],
+        "whyThisMatter": string
+      }},
+      "Achievements": {{
+        "data": [string, string, string],
+        "whyThisMatter": string
+      }},
+      "Certifications": {{
+        "data": [string, string, string],
+        "whyThisMatter": string
+      }}
+    }},
+    "Overall Recommendations": {{
+      "Formatting": {{
+        "data": [string, string, string],
+        "whyThisMatter": string
+      }},
+      "Tailoring": {{
+        "data": [string, string, string],
+        "whyThisMatter": string
+      }},
+      "Proofreading": {{
+        "data": [string, string, string],
+        "whyThisMatter": string
       }}
     }}
-  ]
+  }}
 }}
 
 Rules:
 - All bullet points MUST be arrays of strings
-- Tailor recommendations specifically for the target company’s hiring standards and expectations
-- Keep points concise, actionable, and professional
+- Each "data" array MUST contain 2 to 4 concise bullet points
+- Use professional, ATS-optimized language
+- Tailor recommendations specifically for the target company’s hiring standards
 - Do not hallucinate personal details
 - Ensure valid, parsable JSON
-- Return ONLY JSON, nothing else
+- Return ONLY JSON
+- Do NOT omit any section
+- If information is missing, infer conservatively
 
 Target Job Role:
 {job_role}
-
-Target Company:
-{target_company}
 
 Resume Content:
 {resume_text}
@@ -134,7 +171,7 @@ def getAPIResponse(file_content, job_role, company):
                 {"role": "user", "content": prompt}
             ],
             temperature=0.7,
-            max_tokens=1000,            
+            max_tokens=1500,            
         )
         
         return response.choices[0].message.content  # Return the AI's response
@@ -145,7 +182,7 @@ def getAPIResponse(file_content, job_role, company):
 async def analyze_resume_pdf(
     resume: UploadFile = File(...),
     job_role: str = Form("Software Engineer"),
-    company: str = Form("Software Engineer")
+    company: str = Form("Google")
 ):
     file_bytes = await resume.read()
     print("PDF size (bytes):", len(file_bytes))
