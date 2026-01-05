@@ -4,8 +4,12 @@ import io
 import os
 from openai import OpenAI
 from dotenv import load_dotenv
+from fastapi import HTTPException, status
+from openai import OpenAIError
+
 
 from model.ResumeRequest import ResumeRequest
+
 
 # Load environment variables from .env file
 load_dotenv() 
@@ -58,7 +62,7 @@ def build_resume_analysis_prompt(
     target_company: str
 ) -> str:
     return f"""
-You are an expert ATS resume reviewer and senior hiring manager in company {target_company}.
+You are an expert ATS resume reviewer and senior hiring manager in a company {target_company}.
 
 Analyze the provided resume and return the response STRICTLY in valid JSON format.
 Do NOT include markdown, explanations, or any text outside the JSON.
@@ -174,26 +178,82 @@ def getAPIResponse(file_content, job_role, company):
             max_tokens=1500,            
         )
         
-        return response.choices[0].message.content  # Return the AI's response
+        # Return the AI's response
+        return {
+            "status": "success",
+            "content": response.choices[0].message.content
+        }
+        
+    # OpenAI-specific failure
+    except OpenAIError as e:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail={
+                "status": "error",
+                "code": "OPENAI_API_FAILURE",
+                "message": "Failed to analyze resume",
+                "details": str(e)
+            }
+        )
+
+    # Unknown backend failure
     except Exception as e:
-        return {"error": str(e)}
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail={
+                "status": "error",
+                "code": "INTERNAL_SERVER_ERROR",
+                "message": "Something went wrong",
+                "details": str(e)
+            }
+        )
 
 @app.post("/analyze_resume_pdf")
 async def analyze_resume_pdf(
     resume: UploadFile = File(...),
     job_role: str = Form("Software Engineer"),
-    company: str = Form("Google")
+    company: str = Form("")
 ):
-    file_bytes = await resume.read()
-    print("PDF size (bytes):", len(file_bytes))
+    
+    try:
+        file_bytes = await resume.read()
 
-    text = extract_text_from_pdf(file_bytes)
-    print("Extracted text length:", len(text))
+        if not file_bytes:
+            raise HTTPException(
+                status_code=400,
+                detail={
+                    "status": "error",
+                    "code": "EMPTY_FILE",
+                    "message": "Uploaded file is empty"
+                }
+            )
 
-    if not text.strip():
-        return {
-            "error": "No text extracted",
-            "hint": "PDF might be scanned/image-based"
-        }
+        text = extract_text_from_pdf(file_bytes)
 
-    return getAPIResponse(text, job_role, company)
+        if not text.strip():
+            raise HTTPException(
+                status_code=422,
+                detail={
+                    "status": "error",
+                    "code": "TEXT_EXTRACTION_FAILED",
+                    "message": "No text extracted from PDF",
+                    "hint": "PDF might be scanned or image-based"
+                }
+            )
+
+        return getAPIResponse(text, job_role, company)
+
+    # Let FastAPI handle it
+    except HTTPException:
+        raise
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "status": "error",
+                "code": "RESUME_PROCESSING_ERROR",
+                "message": "Failed to process resume",
+                "details": str(e)
+            }
+        )

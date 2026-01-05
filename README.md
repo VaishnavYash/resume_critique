@@ -27,3 +27,7 @@ Create a .env file in the root directory and add your OpenAI API key: OPENAI_API
 
 ⚠️ Important:
 Add .env to .gitignore to avoid exposing your API key.
+
+
+Command To Run the Code: d
+# uv run uvicorn main:app --host 0.0.0.0 --port 8000 --reload
