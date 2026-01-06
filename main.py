@@ -1,24 +1,30 @@
-from fastapi import Body, FastAPI, File, Form, UploadFile
+import os
+from openai import OpenAI, OpenAIError
+from fastapi import FastAPI, File, UploadFile, Form, HTTPException, status
 import PyPDF2
 import io
-import os
-from openai import OpenAI
-from dotenv import load_dotenv
-from fastapi import HTTPException, status
-from openai import OpenAIError
 
 
 from model.ResumeRequest import ResumeRequest
 
 
 # Load environment variables from .env file
-load_dotenv() 
+# load_dotenv() 
 
 # Initialize FastAPI app
 app = FastAPI()
 
 # Initialize OpenAI client
-openai_api_key = os.getenv("OPENAI_API_KEY")  
+# openai_api_key = os.getenv("OPENAI_API_KEY")  # for system 
+
+app = FastAPI()
+
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+if not OPENAI_API_KEY:
+    raise RuntimeError("OPENAI_API_KEY not set")
+
+client = OpenAI(api_key=OPENAI_API_KEY)
+
         
 # Function to extract text from PDF
 def extract_text_from_pdf(pdf_bytes: bytes) -> str:
@@ -158,36 +164,33 @@ Resume Content:
 """.strip()
 
 
+MAX_CHARS = 15000  # ~8k tokens safety
 # Main function to get API response
 def getAPIResponse(file_content, job_role, company):
     try:
-        # Create prompt for AI
+        file_content = file_content[:15000]  # SAFETY LIMIT
+
         prompt = build_resume_analysis_prompt(file_content, job_role, company)
-        
-        client = OpenAI(api_key=openai_api_key)  # Initialize OpenAI client
+
         response = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
-                # System message to set the context
-                {"role": "system", "content": f"You are an expert resume reviewer with years of experience in HR and recruitment and is recruiting in the Company {company}."}, 
-                
-                # User message with the prompt
+                {"role": "system", "content": f"You are an expert resume reviewer for {company}."},
                 {"role": "user", "content": prompt}
             ],
             temperature=0.7,
-            max_tokens=1500,            
+            max_tokens=1200,
+            timeout=40
         )
-        
-        # Return the AI's response
+
         return {
             "status": "success",
             "content": response.choices[0].message.content
         }
-        
-    # OpenAI-specific failure
+
     except OpenAIError as e:
         raise HTTPException(
-            status_code=status.HTTP_502_BAD_GATEWAY,
+            status_code=502,
             detail={
                 "status": "error",
                 "code": "OPENAI_API_FAILURE",
@@ -257,3 +260,32 @@ async def analyze_resume_pdf(
                 "details": str(e)
             }
         )
+        
+        
+# @app.get("/debug/network")
+# def debug_network():
+#     import requests
+#     try:
+#         r = requests.get("https://api.openai.com/v1/models", timeout=10)
+#         return {
+#             "reachable": True,
+#             "status_code": r.status_code,
+#             "headers": dict(r.headers)
+#         }
+#     except Exception as e:
+#         return {
+#             "reachable": False,
+#             "error": str(e)
+#         }
+        
+# @app.get("/debug/secret")
+# def debug_secret():
+#     key = os.getenv("OPENAI_API_KEY")
+#     return {
+#         "present": key is not None,
+#         "length": len(key) if key else 0,
+#         "starts_with_sk": key.startswith("sk-") if key else False,
+#         "ends_with_newline": key.endswith("\n") if key else False
+#     }
+
+
