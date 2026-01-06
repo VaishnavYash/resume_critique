@@ -76,63 +76,63 @@ Follow this exact JSON structure and key names:
   "analysis": {{
     "Content Clarity and Impact": {{
       "Strengths": {{
-        "data": [string, string, string],
+        "data": List of String,
         "whyThisMatter": string
       }},
       "Areas of Improvement": {{
-        "data": [string, string, string],
+        "data": List of String,
         "whyThisMatter": string
       }}
     }},
     "Skills Presentation": {{
       "Strengths": {{
-        "data": [string, string, string],
+        "data": List of String,
         "whyThisMatter": string
       }},
       "Areas of Improvement": {{
-        "data": [string, string, string],
+        "data": List of String,
         "whyThisMatter": string
       }}
     }},
     "Experience Descriptions": {{
       "Strengths": {{
-        "data": [string, string, string],
+        "data": List of String,
         "whyThisMatter": string
       }},
       "Areas of Improvement": {{
-        "data": [string, string, string],
+        "data": List of String,
         "whyThisMatter": string
       }}
     }},
     "Specific Improvements for {job_role} at {target_company}": {{
       "Technical Depth": {{
-        "data": [string, string, string],
+        "data": List of String,
         "whyThisMatter": string
       }},
       "Project Descriptions": {{
-        "data": [string, string, string],
+        "data": List of String,
         "whyThisMatter": string
       }},
       "Achievements": {{
-        "data": [string, string, string],
+        "data": List of String,
         "whyThisMatter": string
       }},
       "Certifications": {{
-        "data": [string, string, string],
+        "data": List of String,
         "whyThisMatter": string
       }}
     }},
     "Overall Recommendations": {{
       "Formatting": {{
-        "data": [string, string, string],
+        "data": List of String,
         "whyThisMatter": string
       }},
       "Tailoring": {{
-        "data": [string, string, string],
+        "data": List of String,
         "whyThisMatter": string
       }},
       "Proofreading": {{
-        "data": [string, string, string],
+        "data": List of String,
         "whyThisMatter": string
       }}
     }}
