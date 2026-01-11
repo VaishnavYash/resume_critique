@@ -13,6 +13,39 @@ EDUCATION_SCHEMA = """
 }
 """
 
+EXPERIENCE_SCHEMA = """
+{
+  "experience": [
+    {
+      "company": "",
+      "role": "",
+      "from": "",
+      "to": "",
+      "bullets": []
+    }
+  ]
+}
+"""
+
+PROJECTS_SCHEMA = """
+{
+  "projects": [
+    {
+      "name": "",
+      "description": "",
+      "tools": []
+    }
+  ]
+}
+"""
+
+SKILLS_SCHEMA = """
+{
+  "skills": []
+}
+"""
+
+
 SECTION_KEYWORDS = {
     "summary": ["professional summary", "summary", "profile", "objective"],
     "education": ["education", "academic"],

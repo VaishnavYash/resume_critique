@@ -3,10 +3,11 @@ from dotenv import load_dotenv
 from openai import OpenAI
 from fastapi import FastAPI, File, UploadFile, Form, HTTPException
 
-from config import schema, prompts, constants
-from utils import pdf_text_organize as extractPdf, text_extract_from_pdf as textFormat
+from config import constants
+from utils import text_extract_from_pdf as textFormat, utils
 from services import openai_services as services
 
+from core import new_resume_agent as agent
 
 # Load environment variables from .env file
 load_dotenv() 
@@ -82,10 +83,15 @@ async def analyze_resume_pdf(
 async def get_pdf_content(
     # resume: UploadFile = File(...)    
 ):
-    
-    sections = extractPdf. split_resume_sections(constants.tempNormalizedResume)
+    resumeAgent = agent.ResumeAgent(llm_client=client)
+    # text =  textFormat.extract_text_from_pdf(file_bytes)
+
+    return resumeAgent.run(constants.tempNormalizedResume)
+   
+#    print()
+    # sections = extractPdf. split_resume_sections(constants.tempNormalizedResume)
     
     # for sec in sections:
-    return services.get_structured_from_ai(sections['education_raw'], client)
+    # return services.get_structured_from_ai(sections['education_raw'], client)
         
 

@@ -102,18 +102,19 @@ Resume Content:
 """.strip()
 
 
-def organize_resume_content(text, schema) :
-    return f'''
-    Below is the test which you need to infer:
-    {text}
-    
-    produce me a json in the following format: 
+def organize_resume_content(raw_text, schema, section_name) :
+  return  f"""
+    You are given RAW {section_name.upper()} TEXT from a resume.
+
+    Text:
+    {raw_text}
+
+    Return JSON in the following format:
     {schema}
-    
+
     Rules:
-    - Use professional, ATS-optimized language
-    - If information is missing leave it as empty String
-    - Do not hallucinate personal details
-    - Ensure valid, parsable JSON
-    - Return ONLY JSON
-    '''
+    - Use ONLY the given text
+    - Do NOT add or infer information
+    - If missing, use empty strings or empty arrays
+    - Return ONLY valid JSON
+    """

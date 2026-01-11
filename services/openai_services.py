@@ -1,6 +1,7 @@
 from openai import OpenAIError
 from fastapi import HTTPException, status
 from config import prompts, schema
+from utils import utils
 
 # Main function to get analysis of pdf
 def getAPIResponse(file_content, job_role, company, client):
@@ -47,21 +48,3 @@ def getAPIResponse(file_content, job_role, company, client):
                 "details": str(e)
             }
         )
-        
-# Function to get organized sections from GPT
-
-def get_structured_from_ai(text: str, client):
-    #  try:
-    prompt = prompts.organize_resume_content(text, schema.EDUCATION_SCHEMA)
-
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[
-            {"role": "system", "content": "You are a resume parsing assistant."},
-            {"role": "user", "content": prompt}
-        ],
-        temperature=0.0, 
-        max_tokens=800
-    )
-
-    return response.choices[0].message.content
