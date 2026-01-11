@@ -1,7 +1,6 @@
 from openai import OpenAIError
 from fastapi import HTTPException, status
-from config import prompts, schema
-from utils import utils
+from config import prompts
 
 # Main function to get analysis of pdf
 def getAPIResponse(file_content, job_role, company, client):

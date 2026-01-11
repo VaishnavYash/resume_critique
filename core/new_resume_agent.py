@@ -38,31 +38,42 @@ class ResumeAgent:
     def run(self, resume_text):
         normalized = self.normalize(resume_text)
         sections = self.split(normalized)
-
+        
+        # From JD
+        summary = self.structure_section(
+            sections["summary_raw"],schema.SUMMARY_SCHEMA, "summary"
+        )
+        
+        # From Resume
         education = self.structure_section(
             sections["education_raw"],schema.EDUCATION_SCHEMA, "education"
         )
-
+        
+        # From JD
         experience = self.structure_section(
             sections["experience_raw"],schema.EXPERIENCE_SCHEMA, "experience"
         )
         
         # From JD
-
         projects = self.structure_section(
             sections["projects_raw"], schema.PROJECTS_SCHEMA, "projects"
         )
-# From JD
+        
+        # From JD
         skills = self.structure_section(
             sections["skills_raw"], schema.SKILLS_SCHEMA, "skills"
         )
+        
+        # From Resume
+        achievement = self.structure_section(
+            sections["achievements_raw"], schema.ACHIEVEMENT_SCHEMA, "achievement"
+        )
 
         return {
+            "summary": summary.get("summary", []),
             "education": education.get("education", []),
             "experience": experience.get("experience", []),
             "projects": projects.get("projects", []),
-            "skills": skills.get("skills", [])
+            "skills": skills.get("skills", []),
+            "achievement": achievement.get("achievement", []),
         }
-    
-
-

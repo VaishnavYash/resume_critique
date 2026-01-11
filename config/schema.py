@@ -1,3 +1,9 @@
+SUMMARY_SCHEMA = """
+{
+  "summary": ""
+}
+"""
+
 EDUCATION_SCHEMA = """
 {
   "education": [
@@ -21,6 +27,7 @@ EXPERIENCE_SCHEMA = """
       "role": "",
       "from": "",
       "to": "",
+      "topic": "",
       "bullets": []
     }
   ]
@@ -32,7 +39,7 @@ PROJECTS_SCHEMA = """
   "projects": [
     {
       "name": "",
-      "description": "",
+      "description": [],
       "tools": []
     }
   ]
@@ -45,6 +52,12 @@ SKILLS_SCHEMA = """
 }
 """
 
+ACHIEVEMENT_SCHEMA = """
+{
+  "certificate": [],
+  "general Points": ["",""]
+}
+"""
 
 SECTION_KEYWORDS = {
     "summary": ["professional summary", "summary", "profile", "objective"],
