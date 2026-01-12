@@ -11,11 +11,11 @@ class ResumeAgent:
     def split(self, text):
         return pdfOrganize.split_resume_sections(text)
     
-    def structure_section(self, raw_text, schema, section_name):
+    def structure_section(self, raw_text, schema, section_name, jd):
         if not raw_text.strip():
             return {}
 
-        prompt = prompts.organize_resume_content(raw_text, schema, section_name)
+        prompt = prompts.organize_resume_content(raw_text, schema, section_name, jd)
         response = self.client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
@@ -34,39 +34,38 @@ class ResumeAgent:
 
         raise ValueError("LLM failed to return valid JSON")
 
-
-    def run(self, resume_text):
+    def run(self, resume_text, jd):
         normalized = self.normalize(resume_text)
         sections = self.split(normalized)
         
         # From JD
         summary = self.structure_section(
-            sections["summary_raw"],schema.SUMMARY_SCHEMA, "summary"
+            sections["summary_raw"],schema.SUMMARY_SCHEMA, "summary", jd
         )
         
         # From Resume
         education = self.structure_section(
-            sections["education_raw"],schema.EDUCATION_SCHEMA, "education"
+            sections["education_raw"],schema.EDUCATION_SCHEMA, "education", jd
         )
         
         # From JD
         experience = self.structure_section(
-            sections["experience_raw"],schema.EXPERIENCE_SCHEMA, "experience"
+            sections["experience_raw"],schema.EXPERIENCE_SCHEMA, "experience", jd
         )
         
         # From JD
         projects = self.structure_section(
-            sections["projects_raw"], schema.PROJECTS_SCHEMA, "projects"
+            sections["projects_raw"], schema.PROJECTS_SCHEMA, "projects", jd
         )
         
         # From JD
         skills = self.structure_section(
-            sections["skills_raw"], schema.SKILLS_SCHEMA, "skills"
+            sections["skills_raw"], schema.SKILLS_SCHEMA, "skills", jd
         )
         
         # From Resume
         achievement = self.structure_section(
-            sections["achievements_raw"], schema.ACHIEVEMENT_SCHEMA, "achievement"
+            sections["achievements_raw"], schema.ACHIEVEMENT_SCHEMA, "achievement", jd
         )
 
         return {

@@ -222,3 +222,30 @@ RULES (STRICT):
 - If no skills exist, return an empty array
 - Return ONLY valid JSON
 """
+
+
+def jd_extraction_prompt(job_description, schema):
+    return f"""
+You are extracting structured information from a Job Description.
+
+JOB DESCRIPTION:
+{job_description}
+
+TASK:
+Extract the following:
+- Role / Job title
+- Required technical skills
+- Important ATS keywords (responsibilities, tools, concepts)
+
+Return JSON in the following format:
+{schema}
+
+RULES:
+- Do NOT invent skills not mentioned in the JD
+- Merge similar skills (e.g., RESTful APIs → REST API)
+- Exclude soft skills unless technical
+- Keep skills concise (1–3 words)
+- Keywords should be role-relevant phrases
+- If something is missing, return empty values
+- Return ONLY valid JSON
+"""

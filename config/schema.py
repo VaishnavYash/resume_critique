@@ -67,3 +67,11 @@ SECTION_KEYWORDS = {
     "skills": ["skills", "technical skills", "technologies"],
     "achievements": ["achievements", "awards", "accomplishments"]
 }
+
+JD_SCHEMA = """
+{
+  "role": "",
+  "required_skills": [],
+  "keywords": []
+}
+"""

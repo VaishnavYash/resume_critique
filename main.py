@@ -7,7 +7,7 @@ from config import constants
 from utils import text_extract_from_pdf as textFormat, utils
 from services import openai_services as services
 
-from core import new_resume_agent as agent
+from core import new_resume_agent as resumeAgent, job_description_agent as jdAgent
 
 # Load environment variables from .env file
 load_dotenv() 
@@ -81,12 +81,19 @@ async def analyze_resume_pdf(
 
 @app.get("/get_pdf_data")
 async def get_pdf_content(
+    # job_description: str = Form("Software Engineer"),
     # resume: UploadFile = File(...)    
+    
 ):
-    resumeAgent = agent.ResumeAgent(llm_client=client)
     # text =  textFormat.extract_text_from_pdf(file_bytes)
-
-    return resumeAgent.run(constants.tempNormalizedResume)
+    
+    # JD Part
+    jobAgent = jdAgent.JobDescriptionAgent(llm_client=client)
+    return jobAgent.run("job_description")
+    
+    # Resume Part    
+    # resume = resumeAgent.ResumeAgent(llm_client=client)
+    # return resume.run(constants.tempNormalizedResume, jd)
    
 #    print()
     # sections = extractPdf. split_resume_sections(constants.tempNormalizedResume)
@@ -94,4 +101,3 @@ async def get_pdf_content(
     # for sec in sections:
     # return services.get_structured_from_ai(sections['education_raw'], client)
         
-
