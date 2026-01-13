@@ -79,25 +79,56 @@ async def analyze_resume_pdf(
             }
         )
 
-@app.get("/get_pdf_data")
+@app.post("/get_pdf_data")
 async def get_pdf_content(
-    # job_description: str = Form("Software Engineer"),
-    # resume: UploadFile = File(...)    
-    
+    job_description: str = Form("Software Engineer"),
+    resume: UploadFile = File(...)
 ):
-    # text =  textFormat.extract_text_from_pdf(file_bytes)
+    try:
+        file_bytes = await resume.read()
+
+        if not file_bytes:
+            raise HTTPException(
+                status_code=400,
+                detail={
+                    "status": "error",
+                    "code": "EMPTY_FILE",
+                    "message": "Uploaded file is empty"
+                }
+            )
+
+        text =  textFormat.extract_text_from_pdf(file_bytes)
+
+        if not text.strip():
+            raise HTTPException(
+                status_code=422,
+                detail={
+                    "status": "error",
+                    "code": "TEXT_EXTRACTION_FAILED",
+                    "message": "No text extracted from PDF",
+                    "hint": "PDF might be scanned or image-based"
+                }
+            )
+            
     
-    # JD Part
-    jobAgent = jdAgent.JobDescriptionAgent(llm_client=client)
-    return jobAgent.run("job_description")
-    
-    # Resume Part    
-    # resume = resumeAgent.ResumeAgent(llm_client=client)
-    # return resume.run(constants.tempNormalizedResume, jd)
-   
-#    print()
-    # sections = extractPdf. split_resume_sections(constants.tempNormalizedResume)
-    
-    # for sec in sections:
-    # return services.get_structured_from_ai(sections['education_raw'], client)
+        # JD Part
+        jobAgent = jdAgent.JobDescriptionAgent(llm_client=client)
+        job_json = jobAgent.run("job_description")
         
+        # Resume Part    
+        resume = resumeAgent.ResumeAgent(llm_client=client)
+        return resume.run(constants.tempNormalizedResume, job_json)
+
+    except HTTPException:
+        raise
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "status": "error",
+                "code": "RESUME_PROCESSING_ERROR",
+                "message": "Failed to process resume",
+                "details": str(e)
+            }
+        )
