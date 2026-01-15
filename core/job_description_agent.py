@@ -21,8 +21,7 @@ class JobDescriptionAgent:
                 filtered.append(k.strip())
 
         return filtered
-
-            
+           
     def call_open_ai_api(self, job_data):
         return constants.constJdOutput
         # if not job_data.strip():

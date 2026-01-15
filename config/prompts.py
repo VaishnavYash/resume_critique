@@ -102,11 +102,11 @@ Resume Content:
 """.strip()
 
 
-def organize_resume_content(raw_text, schema, section_name: str, job_data):
+def organize_resume_content(raw_text, schema, section_name: str, job_data, experience_json, projects_json, skills_list):
 
   match section_name:
     case "summary":
-      return general_prompt(raw_text, schema, section_name, job_data, '''Generate a 2–3 line ATS-optimized professional summary matching the JOB DESCRIPTION''')
+      return summary_prompt(experience_json, projects_json, skills_list, job_data)
     
     case "education":
       return f"""
@@ -120,9 +120,12 @@ def organize_resume_content(raw_text, schema, section_name: str, job_data):
 
         Rules:
         - Use ONLY the given text
+        - Capitalize proper nouns correctly
+        - Use consistent formatting for degrees and institutions
         - Do NOT add or infer information
         - If missing, use empty strings or empty arrays
         - Return ONLY valid JSON
+        
         """
     
     case "experience":
@@ -143,52 +146,66 @@ def organize_resume_content(raw_text, schema, section_name: str, job_data):
 
       JOB DESCRIPTION CONTEXT:
       {job_data}
+      
+      Return JSON in the following format:
+      {schema}
 
       RULES:
       - Achievements must be directly supported by resume content
       - Do NOT invent awards or metrics
       - Use concise bullet points
-      - Return JSON in format:
-      {{ "achievements": [] }}
       - Return ONLY JSON
+      - Return raw JSON only.
+      - Do NOT include explanations, markdown, or code fences.
       """
 
 def general_prompt(raw_text, schema, section_name, job_data, extra_prompt):
     return f"""
-You are optimizing a resume for ATS screening.
-{extra_prompt}
+You are optimizing a resume for ATS screening. {extra_prompt}
 
-SOURCE OF TRUTH (IMPORTANT):
-- Resume data = FACTS (must not be changed or expanded)
-- Job description = KEYWORDS + LANGUAGE ONLY
+SOURCE OF TRUTH (CRITICAL):
+- Resume data = FACTS (must not change)
+- Job description = KEYWORDS, LANGUAGE, EMPHASIS ONLY
 
 SECTION TO OPTIMIZE: {section_name.upper()}
 
-RESUME DATA (FACTS):
+RESUME DATA (FACTS — do not invent beyond this):
 {raw_text}
 
-JOB DESCRIPTION (KEYWORDS & EMPHASIS):
+JOB DESCRIPTION (for keyword alignment only):
 {job_data}
 
-TASK:
-Rewrite the resume data to better match the job description
-using ATS-friendly language, while preserving all original facts.
+TASK (MANDATORY):
+Rewrite and IMPROVE the resume content to better match the job description.
+
+You MUST:
+- Strengthen bullet points using action verbs
+- Improve clarity and impact of each point
+- Rephrase sentences to include relevant JD keywords
+- Make responsibilities sound results-oriented
+- Merge weak or redundant points if needed
+- Add at most 4 bullets IF the resume text clearly implies them
+
+You MUST NOT:
+- Add new skills, tools, or technologies
+- Add new companies, projects, roles, or experience
+- Add years, metrics, or achievements not implied
+- Change factual meaning
 
 Return JSON in the following format:
 {schema}
 
-RULES:
-- In case points to be added add max 4 points.
-- Use only skills and experience present in Resume Data
-- Do NOT add new skills, tools, or technologies.
-- Do NOT add new companies, projects, roles or years of experience.
-- If information is missing, leave it empty.
-- Use power verbs and action verbs
-- Tailor language to the job description
-- Professional, concise tone
-- No exaggeration or new claims
-- Ensure valid, parsable JSON.
-- Return ONLY JSON.
+STRICT RULES:
+- Use ONLY information present or clearly implied in resume data
+- Rewording and restructuring is REQUIRED (do not return unchanged text)
+- Use professional, ATS-friendly language
+- Use power verbs (developed, implemented, optimized, delivered, etc.)
+- Concise but impactful phrasing
+- If information is missing, leave it empty
+- Ensure valid, parsable JSON
+- Return ONLY JSON
+- Return raw JSON only.
+- Do NOT include explanations, markdown, or code fences.
 """
 
 def skills_prompt(resume_skills_text, job_description, schema):
@@ -206,8 +223,7 @@ JOB DESCRIPTION (for relevance only):
 {job_description}
 
 TASK:
-Return a cleaned, deduplicated, ATS-friendly list of skills
-using ONLY the skills explicitly present in the resume.
+Return a cleaned, deduplicated, ATS-friendly list of skills using ONLY the skills explicitly present in the resume.
 
 Return JSON in the following format:
 {schema}
@@ -220,7 +236,11 @@ RULES (STRICT):
 - Remove duplicates and irrelevant skills
 - Preserve original meaning
 - If no skills exist, return an empty array
+- return atmost 10 skills in each category
+- Ensure valid, parsable JSON
 - Return ONLY valid JSON
+- Return raw JSON only.
+- Do NOT include explanations, markdown, or code fences.
 """
 
 
@@ -248,4 +268,46 @@ RULES:
 - Keywords should be role-relevant phrases
 - If something is missing, return empty values
 - Return ONLY valid JSON
+- Return raw JSON only.
+- Do NOT include explanations, markdown, or code fences.
 """
+
+def summary_prompt(experience_json, projects_json, skills_list, job_data):
+  return f'''
+  You are generating a NEW professional profile summary for a resume.
+
+IMPORTANT:
+- Do NOT rewrite or reference any existing summary.
+- Generate the summary ONLY from experience, projects, and skills.
+
+SOURCE OF TRUTH:
+- Experience and project data = facts
+- Skills list = allowed technologies
+- Job description = role focus and keywords only
+
+EXPERIENCE:
+{experience_json}
+
+PROJECTS:
+{projects_json}
+
+SKILLS:
+{skills_list}
+
+JOB DESCRIPTION:
+{job_data}
+
+TASK:
+Generate a 2–3 line ATS-optimized professional summary.
+
+RULES:
+- Use only information present in the experience, projects, and skills
+- Do NOT add new skills, tools, companies, or experience
+- Align language with the job description
+- Professional, concise, impact-focused tone
+- No exaggeration or seniority inflation
+- Do NOT mention years of experience unless explicitly stated
+- Plain text only (no JSON, no bullets, no heading)
+- Return raw JSON only.
+- Do NOT include explanations, markdown, or code fences.
+'''

@@ -28,7 +28,8 @@ EXPERIENCE_SCHEMA = """
       "from": "",
       "to": "",
       "topic": "",
-      "bullets": []
+      "bullets": [],
+      "location": ""
     }
   ]
 }
@@ -40,7 +41,8 @@ PROJECTS_SCHEMA = """
     {
       "name": "",
       "description": [],
-      "tools": []
+      "tools": [],
+      "location": ""
     }
   ]
 }
@@ -48,24 +50,29 @@ PROJECTS_SCHEMA = """
 
 SKILLS_SCHEMA = """
 {
-  "skills": []
+  "skills": 
+    {
+      "technical_skills": [],
+      "tools_technologies": [],
+      ...      
+      },
+  ]
 }
 """
 
 ACHIEVEMENT_SCHEMA = """
 {
-  "certificate": [],
-  "general Points": ["",""]
-}
+  "achievements": []
+  }
 """
 
 SECTION_KEYWORDS = {
-    "summary": ["professional summary", "summary", "profile", "objective"],
-    "education": ["education", "academic"],
-    "experience": ["experience", "work experience", "employment"],
-    "projects": ["projects", "personal projects"],
-    "skills": ["skills", "technical skills", "technologies"],
-    "achievements": ["achievements", "awards", "accomplishments"]
+    "summary": ["professional summary", "summary", "profile", "objective", "career objective", "professional profile"],
+    "education": ["education", "academic", "qualifications", "educational background"],
+    "experience": ["experience", "work experience", "employment", "professional experience"],
+    "projects": ["projects", "personal projects", "project experience"],
+    "skills": ["skills", "technical skills", "technologies", "tools", "programming languages"],
+    "achievements": ["achievements", "awards", "accomplishments", "certifications", "certificates", "honors", "recognitions", "notable", "distinctions"]
 }
 
 JD_SCHEMA = """
@@ -75,3 +82,12 @@ JD_SCHEMA = """
   "keywords": []
 }
 """
+
+TEMPERATURES = {
+    "education": 0.0,
+    "skills": 0.0,
+    "experience": 0.2,
+    "projects": 0.2,
+    "summary": 0.3,
+    "achievement":0.0
+}
