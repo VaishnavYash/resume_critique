@@ -107,7 +107,7 @@ Seeks feedback and iterates on solutions'''),
     # resume: UploadFile = File(...)
 ):
     try:
-        # # file_bytes = await resume.read()
+        # file_bytes = await resume.read()
 
         # if not file_bytes:
         #     raise HTTPException(
@@ -118,8 +118,10 @@ Seeks feedback and iterates on solutions'''),
         #             "message": "Uploaded file is empty"
         #         }
         #     )
-
-        # text =  textFormat.extract_text_from_pdf(file_bytes)
+            
+        # text =  textFormat.extract_text_with_inline_urls(file_bytes)
+        
+        
 
         # if not text.strip():
         #     raise HTTPException(

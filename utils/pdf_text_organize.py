@@ -43,6 +43,7 @@ def is_heading(line: str):
 
 def split_resume_sections(text: str):
     sections = {
+        "personal_raw": "",
         "summary_raw": "",
         "education_raw": "",
         "experience_raw": "",
@@ -52,16 +53,27 @@ def split_resume_sections(text: str):
     }
 
     current_section = None
+    
+    is_heading_detected = False
+    personal_section = ""
 
     for line in text.split("\n"):
         heading = is_heading(line)
-
+        
+        if(heading is not None):
+            is_heading_detected = True 
+            
+        if(is_heading_detected == False):
+            personal_section += line+ "\n"
+                
         if heading:
             current_section = f"{heading}_raw"
             continue
 
         if current_section:
-            sections[current_section] += line + "\n"        
+            sections[current_section] += line + "\n"
+
+    sections["personal_raw"] = personal_section
 
     return {k: v.strip() for k, v in sections.items()}
 

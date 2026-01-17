@@ -27,9 +27,6 @@ class ResumeAgent:
         )
 
         output = response.choices[0].message.content
-        print("----- RAW LLM OUTPUT -----")
-        print(output)
-        print("----- END RAW OUTPUT -----")
         parsed = utils.safe_json_load(output)
 
         if parsed is not None:
@@ -40,6 +37,14 @@ class ResumeAgent:
     def run(self, resume_text, jd):
         normalized = self.normalize(resume_text)
         sections = self.split(normalized)
+        
+        # return {"sections": sections}
+        
+        # From JD
+        personal = self.structure_section(sections,
+            sections["personal_raw"], schema.PERSONAL_INFO_SCHEMA, "personal", jd
+        )
+        # print(f"Personal Section Structured : {personal}")
         
         # From JD
         summary = self.structure_section(sections, 
@@ -74,6 +79,7 @@ class ResumeAgent:
         return {
             "status": "success",
             "content": {
+                "personal": personal.get("personal_info", []),
                 "summary": summary.get("summary", []),
                 "education": education.get("education", []),
                 "experience": experience.get("experience", []),

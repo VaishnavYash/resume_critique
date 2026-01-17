@@ -105,6 +105,25 @@ Resume Content:
 def organize_resume_content(raw_text, schema, section_name: str, job_data, experience_json, projects_json, skills_list):
 
   match section_name:
+    case "personal":
+      return f"""
+        You are given RAW {section_name.upper()} TEXT from a resume.
+
+        Text:
+        {raw_text}
+
+        Return JSON in the following format:
+        {schema}
+
+        Rules:
+        - Use ONLY the given text
+        - Capitalize proper nouns correctly
+        - Do NOT add or infer information
+        - If missing, use empty strings
+        - Return ONLY valid JSON
+        
+        """
+    
     case "summary":
       return summary_prompt(experience_json, projects_json, skills_list, job_data)
     

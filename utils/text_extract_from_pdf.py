@@ -1,4 +1,5 @@
 import io
+import fitz
 import PyPDF2
 
 
@@ -13,6 +14,40 @@ def extract_text_from_pdf(pdf_bytes: bytes) -> str:
         return text
     except Exception:
         return ""
+
+
+def extract_text_with_inline_urls(pdf_bytes: bytes) -> str:
+    doc = fitz.open(stream=pdf_bytes, filetype="pdf")
+    output = []
+
+    for page in doc:
+        links = page.get_links()
+        blocks = page.get_text("dict")["blocks"]
+
+        for block in blocks:
+            if block["type"] != 0:
+                continue
+
+            for line in block["lines"]:
+                line_text = ""
+
+                for span in line["spans"]:
+                    span_text = span["text"]
+                    span_rect = fitz.Rect(span["bbox"])
+
+                    # Check if span overlaps a link
+                    for link in links:
+                        if "uri" in link and span_rect.intersects(fitz.Rect(link["from"])):
+                            span_text += f" ({link['uri']})"
+                            break
+
+                    line_text += span_text
+
+                output.append(line_text)
+
+        output.append("\n")
+
+    return "\n".join(output).strip()
 
 # Function to extract text from uploaded file (PDF or TXT)
 def extract_text_from_file(uploaded_file):
