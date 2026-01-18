@@ -56,18 +56,6 @@ PROJECTS_SCHEMA = """
 }
 """
 
-# SKILLS_SCHEMA = """
-# {
-#   "skills": 
-#     {
-#       "technical_skills": [],
-#       "tools_technologies": [],
-#       ...      
-#       },
-#   ]
-# }
-# """
-
 ACHIEVEMENT_SCHEMA = """
 {
   "achievements": []
@@ -85,6 +73,7 @@ SECTION_KEYWORDS = {
 
 JD_SCHEMA = """
 {
+  "company": "",
   "role": "",
   "required_skills": [],
   "keywords": []

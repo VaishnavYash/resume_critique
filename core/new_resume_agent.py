@@ -65,19 +65,10 @@ class ResumeAgent:
             sections["projects_raw"], schema.PROJECTS_SCHEMA, "projects", jd
         )
         
-        # # From JD
-        # skills = self.structure_section(sections,
-        #     sections["skills_raw"], schema.SKILLS_SCHEMA, "skills", jd
-        # )
-        
         # From Resume
         achievement = self.structure_section(sections,
             sections["achievements_raw"], schema.ACHIEVEMENT_SCHEMA, "achievement", jd
         )
-        print('----------------------------------- Start Structured Sections -----------------------------------')
-        print(f"Achievement Section Structured : {achievement}")
-        print(f"Summary Section Structured : {summaryResponse}")
-        print('----------------------------------- End Structured Sections -----------------------------------')
 
         return {
             "status": "success",

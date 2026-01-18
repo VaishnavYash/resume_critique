@@ -3,7 +3,7 @@ from config import schema
 # Function to create prompt for AI
 def build_resume_analysis_prompt(
     resume_text: str,
-    job_role: str,
+    job_json,
     target_company: str
 ) -> str:
     return f"""
@@ -49,7 +49,7 @@ Follow this exact JSON structure and key names:
         "whyThisMatter": string
       }}
     }},
-    "Specific Improvements for {job_role}": {{
+    "Specific Improvements for {job_json.get("role", [])}": {{
       "Technical Depth": {{
         "data": List of String,
         "whyThisMatter": string
@@ -96,7 +96,7 @@ Rules:
 - If information is missing, infer conservatively
 
 Target Job Role:
-{job_role}
+{job_json}
 
 Resume Content:
 {resume_text}
@@ -149,14 +149,11 @@ def organize_resume_content(raw_text, schema, section_name: str, job_data, exper
         """
     
     case "experience":
-      return general_prompt(raw_text, schema, section_name, job_data, '''Rewrite the following EXPERIENCE bullets to be ATS-optimized''')
+      return general_prompt(raw_text, schema, section_name, job_data, '''Rewrite the following EXPERIENCE bullets to be ATS-optimized, Atmost 5 bullets per role. and each bullet must be atmost 15 words long''')
     
     case "projects":
-      return general_prompt(raw_text, schema, section_name, job_data, '''Rewrite PROJECT descriptions bullets to align with the job description ''')
+      return general_prompt(raw_text, schema, section_name, job_data, '''Rewrite PROJECT descriptions bullets to align with the job description , Atmost 5 bullets per role. and each bullet must be atmost 15 words long''')
 
-    # case "skills":
-    #   return skills_prompt(raw_text, job_data, schema)
-    
     case _:
           return f"""
       Derive ACHIEVEMENTS from the resume content.
@@ -171,6 +168,9 @@ def organize_resume_content(raw_text, schema, section_name: str, job_data, exper
       {schema}
 
       RULES:
+      - Atmost 4 achievement bullets
+      - Each bullet must be atmost 15 words long
+      - Use ONLY information present in the resume data
       - Achievements must be directly supported by resume content
       - Do NOT invent awards or metrics
       - Use concise bullet points

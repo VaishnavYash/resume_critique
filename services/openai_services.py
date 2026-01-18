@@ -3,11 +3,13 @@ from fastapi import HTTPException, status
 from config import prompts
 
 # Main function to get analysis of pdf
-def getAPIResponse(file_content, job_role, company, client):
+def getAPIResponse(file_content, job_json, client):
     try:
         file_content = file_content[:15000]  # SAFETY LIMIT
+        
+        company = job_json.get("company", [])
 
-        prompt = prompts.build_resume_analysis_prompt(file_content, job_role, company)
+        prompt = prompts.build_resume_analysis_prompt(file_content, job_json, company)
 
         response = client.chat.completions.create(
             model="gpt-4o-mini",

@@ -23,27 +23,28 @@ class JobDescriptionAgent:
         return filtered
            
     def call_open_ai_api(self, job_data):
-        return constants.constJdOutput
-        # if not job_data.strip():
-        #     return {}
-        # prompt = prompts.jd_extraction_prompt(job_data, schema.JD_SCHEMA)
-        # response = self.client.chat.completions.create(
-        #     model="gpt-4o-mini",
-        #     messages=[
-        #         {"role": "system", "content": "You are a Job Description parsing assistant."},
-        #         {"role": "user", "content": prompt}
-        #     ],
-        #     temperature=0.0,
-        #     max_tokens=800
-        # )
+        if not job_data.strip():
+            return {}
+        prompt = prompts.jd_extraction_prompt(job_data, schema.JD_SCHEMA)
+        response = self.client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": "You are a Job Description parsing assistant."},
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0.0,
+            max_tokens=800
+        )
 
-        # output = response.choices[0].message.content
-        # parsed = utils.safe_json_load(output)
+        output = response.choices[0].message.content
+        parsed = utils.safe_json_load(output)
         
-        # if parsed is not None:
-        #     return parsed
+        print(f"Job Description Parsed : {parsed}")
+        
+        if parsed is not None:
+            return parsed
 
-        # raise ValueError("LLM failed to return valid JSON")
+        raise ValueError("LLM failed to return valid JSON")
 
     def run(self, job_data):
         api_response = self.call_open_ai_api(job_data)
