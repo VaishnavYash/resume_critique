@@ -149,10 +149,10 @@ def organize_resume_content(raw_text, schema, section_name: str, job_data, exper
         """
     
     case "experience":
-      return general_prompt(raw_text, schema, section_name, job_data, '''Rewrite the following EXPERIENCE bullets to be ATS-optimized, Atmost 6 bullets per role. and each bullet must be atmost 20 words long''')
+      return general_prompt(raw_text, schema, section_name, job_data, '''Rewrite the following EXPERIENCE bullets to be ATS-optimized, Atmost 6 bullets per role. and each bullet must be atmost 25 words long''')
     
     case "projects":
-      return general_prompt(raw_text, schema, section_name, job_data, '''Rewrite PROJECT descriptions bullets to align with the job description , Atmost 5 bullets per role. and each bullet must be atmost 20 words long''')
+      return general_prompt(raw_text, schema, section_name, job_data, '''Rewrite PROJECT descriptions bullets to align with the job description , Atmost 6 bullets per role. and each bullet must be atmost 25 words long''')
 
     case _:
           return f"""
@@ -168,8 +168,8 @@ def organize_resume_content(raw_text, schema, section_name: str, job_data, exper
       {schema}
 
       RULES:
-      - Atmost 4 achievement bullets
-      - Each bullet must be atmost 20 words long
+      - Atmost 5 achievement bullets
+      - Each bullet must be atmost 25 words long
       - Use ONLY information present in the resume data
       - Achievements must be directly supported by resume content
       - Do NOT invent awards or metrics

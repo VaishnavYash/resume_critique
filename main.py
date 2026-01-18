@@ -1,5 +1,4 @@
 import os
-from dotenv import load_dotenv
 from openai import OpenAI
 from fastapi import FastAPI, File, UploadFile, Form, HTTPException
 
@@ -9,8 +8,8 @@ from services import openai_services as services
 
 from core import new_resume_agent as resumeAgent, job_description_agent as jdAgent
 
-# Load environment variables from .env file
-load_dotenv() 
+# # Load environment variables from .env file
+# load_dotenv() 
 
 # Initialize FastAPI app
 app = FastAPI()
@@ -102,8 +101,6 @@ async def get_pdf_content(
             
         text =  textFormat.extract_text_with_inline_urls(file_bytes)
         
-        
-
         if not text.strip():
             raise HTTPException(
                 status_code=422,
@@ -114,8 +111,7 @@ async def get_pdf_content(
                     "hint": "PDF might be scanned or image-based"
                 }
             )
-            
-    
+
         # JD Part
         jobAgent = jdAgent.JobDescriptionAgent(llm_client=client)
         job_json = jobAgent.run(job_description)
