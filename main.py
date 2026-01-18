@@ -123,7 +123,7 @@ async def get_pdf_content(
         # Resume Part    
         resume = resumeAgent.ResumeAgent(llm_client=client)
         return resume.run(text, job_json)
-
+        
     except HTTPException:
         raise
 
