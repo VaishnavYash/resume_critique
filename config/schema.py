@@ -1,6 +1,11 @@
 SUMMARY_SCHEMA = """
 {
-  "summary": ""
+  "summary": "",
+  "skills": {
+    "technical_skills": [],
+    "tools_technologies": [],
+    ...
+  }
 }
 """
 
@@ -51,17 +56,17 @@ PROJECTS_SCHEMA = """
 }
 """
 
-SKILLS_SCHEMA = """
-{
-  "skills": 
-    {
-      "technical_skills": [],
-      "tools_technologies": [],
-      ...      
-      },
-  ]
-}
-"""
+# SKILLS_SCHEMA = """
+# {
+#   "skills": 
+#     {
+#       "technical_skills": [],
+#       "tools_technologies": [],
+#       ...      
+#       },
+#   ]
+# }
+# """
 
 ACHIEVEMENT_SCHEMA = """
 {
@@ -75,7 +80,7 @@ SECTION_KEYWORDS = {
     "experience": ["experience", "work experience", "employment", "professional experience"],
     "projects": ["projects", "personal projects", "project experience"],
     "skills": ["skills", "technical skills", "technologies", "tools", "programming languages"],
-    "achievements": ["achievements", "awards", "accomplishments", "certifications", "certificates", "honors", "recognitions", "notable", "distinctions"]
+    "achievements": ["achievement", "achievements", "awards", "accomplishments", "certifications", "certificates", "honors", "recognitions", "notable", "distinctions"]
 }
 
 JD_SCHEMA = """
@@ -102,9 +107,7 @@ PERSONAL_INFO_SCHEMA = """
     "name": "",
     "email": "",
     "phone": "",
-    "linkedin_url": "",
-    "github_url": "",
-    "website": "",
+    "urls": [],
     "location": "",
     "designation": ""
   }

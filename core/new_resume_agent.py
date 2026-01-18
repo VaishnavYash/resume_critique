@@ -33,7 +33,7 @@ class ResumeAgent:
             return parsed
 
         raise ValueError("LLM failed to return valid JSON")
-
+    
     def run(self, resume_text, jd):
         normalized = self.normalize(resume_text)
         sections = self.split(normalized)
@@ -44,10 +44,9 @@ class ResumeAgent:
         personal = self.structure_section(sections,
             sections["personal_raw"], schema.PERSONAL_INFO_SCHEMA, "personal", jd
         )
-        # print(f"Personal Section Structured : {personal}")
         
         # From JD
-        summary = self.structure_section(sections, 
+        summaryResponse = self.structure_section(sections, 
             sections["summary_raw"],schema.SUMMARY_SCHEMA, "summary", jd
         )
         
@@ -66,25 +65,29 @@ class ResumeAgent:
             sections["projects_raw"], schema.PROJECTS_SCHEMA, "projects", jd
         )
         
-        # From JD
-        skills = self.structure_section(sections,
-            sections["skills_raw"], schema.SKILLS_SCHEMA, "skills", jd
-        )
+        # # From JD
+        # skills = self.structure_section(sections,
+        #     sections["skills_raw"], schema.SKILLS_SCHEMA, "skills", jd
+        # )
         
         # From Resume
         achievement = self.structure_section(sections,
             sections["achievements_raw"], schema.ACHIEVEMENT_SCHEMA, "achievement", jd
         )
+        print('----------------------------------- Start Structured Sections -----------------------------------')
+        print(f"Achievement Section Structured : {achievement}")
+        print(f"Summary Section Structured : {summaryResponse}")
+        print('----------------------------------- End Structured Sections -----------------------------------')
 
         return {
             "status": "success",
             "content": {
                 "personal": personal.get("personal_info", []),
-                "summary": summary.get("summary", []),
+                "summary": summaryResponse.get("summary", []),
                 "education": education.get("education", []),
                 "experience": experience.get("experience", []),
                 "projects": projects.get("projects", []),
-                "skills": skills.get("skills", []),
-                "achievement": achievement.get("achievement", []),
+                "skills": summaryResponse.get("skills", []),
+                "achievement": achievement.get("achievements", []),
             }
         }

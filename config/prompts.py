@@ -1,3 +1,4 @@
+from config import schema
 
 # Function to create prompt for AI
 def build_resume_analysis_prompt(
@@ -153,8 +154,8 @@ def organize_resume_content(raw_text, schema, section_name: str, job_data, exper
     case "projects":
       return general_prompt(raw_text, schema, section_name, job_data, '''Rewrite PROJECT descriptions bullets to align with the job description ''')
 
-    case "skills":
-      return skills_prompt(raw_text, job_data, schema)
+    # case "skills":
+    #   return skills_prompt(raw_text, job_data, schema)
     
     case _:
           return f"""
@@ -227,42 +228,6 @@ STRICT RULES:
 - Do NOT include explanations, markdown, or code fences.
 """
 
-def skills_prompt(resume_skills_text, job_description, schema):
-    return f"""
-You are cleaning and organizing SKILLS for an ATS-optimized resume.
-
-SOURCE OF TRUTH:
-- Resume skills text = the ONLY allowed skills
-- Job description = relevance guidance ONLY
-
-RESUME SKILLS (FACTS):
-{resume_skills_text}
-
-JOB DESCRIPTION (for relevance only):
-{job_description}
-
-TASK:
-Return a cleaned, deduplicated, ATS-friendly list of skills using ONLY the skills explicitly present in the resume.
-
-Return JSON in the following format:
-{schema}
-
-RULES (STRICT):
-- DO NOT add skills from the job description
-- DO NOT infer related technologies
-- DO NOT expand acronyms unless explicitly written
-- Normalize capitalization only (e.g., "rest api" → "REST API")
-- Remove duplicates and irrelevant skills
-- Preserve original meaning
-- If no skills exist, return an empty array
-- return atmost 10 skills in each category
-- Ensure valid, parsable JSON
-- Return ONLY valid JSON
-- Return raw JSON only.
-- Do NOT include explanations, markdown, or code fences.
-"""
-
-
 def jd_extraction_prompt(job_description, schema):
     return f"""
 You are extracting structured information from a Job Description.
@@ -292,41 +257,59 @@ RULES:
 """
 
 def summary_prompt(experience_json, projects_json, skills_list, job_data):
-  return f'''
-  You are generating a NEW professional profile summary for a resume.
+  return f'''You are generating a NEW professional profile summary and cleaning SKILLS
+for an ATS-optimized resume.
 
 IMPORTANT:
 - Do NOT rewrite or reference any existing summary.
-- Generate the summary ONLY from experience, projects, and skills.
+- Generate a completely NEW summary.
+- Skills must be selected ONLY from the resume skills text.
+- This is a SYNTHESIS + ORGANIZATION task, NOT invention.
 
-SOURCE OF TRUTH:
-- Experience and project data = facts
-- Skills list = allowed technologies
-- Job description = role focus and keywords only
+SOURCE OF TRUTH (STRICT):
+- Experience and project data = FACTS (must not change)
+- Resume skills text = ONLY allowed skills
+- Job description = role focus and relevance guidance ONLY
 
-EXPERIENCE:
+EXPERIENCE (FACTS):
 {experience_json}
 
-PROJECTS:
+PROJECTS (FACTS):
 {projects_json}
 
-SKILLS:
+RESUME SKILLS (ONLY THESE ARE ALLOWED):
 {skills_list}
 
-JOB DESCRIPTION:
+JOB DESCRIPTION (for relevance and wording only):
 {job_data}
 
-TASK:
-Generate a 2–3 line ATS-optimized professional summary.
+TASKS:
+1. Generate a NEW 2–3 line ATS-optimized professional summary.
+2. Clean, deduplicate, and organize the resume skills into ATS-friendly categories.
 
-RULES:
-- Use only information present in the experience, projects, and skills
-- Do NOT add new skills, tools, companies, or experience
-- Align language with the job description
+RULES (MANDATORY):
+- Use ONLY information present in experience, projects, and resume skills
+- Do NOT add new skills, tools, technologies, companies, roles, or experience
+- Do NOT infer skills from the job description
+- Do NOT expand acronyms unless explicitly written
+- Normalize capitalization only (e.g., "rest api" → "REST API")
+- Remove duplicates and clearly irrelevant skills
+- Preserve original meaning of skills
+- Return at most 10 skills per category
+- Align summary language with the job description
 - Professional, concise, impact-focused tone
 - No exaggeration or seniority inflation
 - Do NOT mention years of experience unless explicitly stated
-- Plain text only (no JSON, no bullets, no heading)
-- Return raw JSON only.
-- Do NOT include explanations, markdown, or code fences.
+
+OUTPUT FORMAT (STRICT):
+Return valid JSON in the following format ONLY:
+{schema.SUMMARY_SCHEMA}
+
+
+OUTPUT RULES:
+- Skills MUST come only from RESUME SKILLS text
+- If a category has no skills, return an empty array
+- Ensure valid, parsable JSON
+- Return raw JSON only
+- Do NOT include explanations, markdown, comments, or code fences
 '''
