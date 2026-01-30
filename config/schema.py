@@ -74,9 +74,10 @@ SECTION_KEYWORDS = {
 JD_SCHEMA = """
 {
   "company": "",
-  "role": "",
-  "required_skills": [],
-  "keywords": []
+  "role": string,
+  "required_skills": [string],
+  "preferred_skills": [string],
+  "core_keywords": [string]
 }
 """
 

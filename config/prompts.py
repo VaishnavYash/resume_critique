@@ -98,7 +98,7 @@ Rules:
 Target Job Role:
 {job_json}
 
-Resume Content:
+RESUME CONTENT:
 {resume_text}
 """.strip()
 
@@ -160,9 +160,16 @@ def organize_resume_content(raw_text, schema, section_name: str, job_data, exper
 
       RESUME DATA:
       {raw_text}
+      
+      ATS KEYWORDS (HIGH PRIORITY):
+      Required Skills:
+      {job_data.get("required_skills", [])}
 
-      JOB DESCRIPTION CONTEXT:
-      {job_data}
+      Core Keywords:
+      {job_data.get("core_keywords", [])}
+
+      Preferred Skills (use only if implied):
+      {job_data.get("preferred_skills", [])}
       
       Return JSON in the following format:
       {schema}
@@ -180,96 +187,120 @@ def organize_resume_content(raw_text, schema, section_name: str, job_data, exper
       """
 
 def general_prompt(raw_text, schema, section_name, job_data, extra_prompt):
+    # print(f'Job Data : {job_data}') 
+    # print(f"\n required_skills: {job_data.get("required_skills", [])}")
+    # print(f"\n preferred_skills: {job_data.get("preferred_skills", [])}")
+    # print(f"\n core_keywords: {job_data.get("core_keywords", [])}\n")
+    
     return f"""
-You are optimizing a resume for ATS screening. {extra_prompt}
+You are rewriting a resume section for MAXIMUM ATS MATCH SCORE.
+{extra_prompt}
 
-SOURCE OF TRUTH (CRITICAL):
-- Resume data = FACTS (must not change)
-- Job description = KEYWORDS, LANGUAGE, EMPHASIS ONLY
+SOURCE OF TRUTH:
+- Resume data = factual constraints
+- Job description = keyword source ONLY
 
-SECTION TO OPTIMIZE: {section_name.upper()}
+SECTION: {section_name.upper()}
 
-RESUME DATA (FACTS — do not invent beyond this):
+RESUME DATA (FACTS — do not contradict):
 {raw_text}
 
-JOB DESCRIPTION (for keyword alignment only):
-{job_data}
+ATS KEYWORDS (HIGH PRIORITY):
+Required Skills:
+{job_data.get("required_skills", [])}
 
-TASK (MANDATORY):
-Rewrite and IMPROVE the resume content to better match the job description.
+Core Keywords:
+{job_data.get("core_keywords", [])}
 
-You MUST:
-- Strengthen bullet points using action verbs
-- Improve clarity and impact of each point
-- Rephrase sentences to include relevant JD keywords
-- Make responsibilities sound results-oriented
-- Merge weak or redundant points if needed
-- Add at most 4 bullets IF the resume text clearly implies them
+Preferred Skills (use only if implied):
+{job_data.get("preferred_skills", [])}
 
-You MUST NOT:
-- Add new skills, tools, or technologies
-- Add new companies, projects, roles, or experience
-- Add years, metrics, or achievements not implied
-- Change factual meaning
+PRIMARY OBJECTIVE:
+Increase ATS keyword match score while preserving factual accuracy.
 
-Return JSON in the following format:
+MANDATORY ATS RULES:
+- Explicitly surface skills/tools that are CLEARLY IMPLIED by the resume text
+- Prefer EXACT keyword phrases from the JD
+- Repeat JD-critical keywords at least 2 times across bullets if supported
+- Use canonical naming (e.g., "REST API" not "RESTful services")
+- Avoid vague phrases (e.g., "worked on", "helped with")
+
+YOU MUST:
+- Rewrite every bullet (do NOT keep original wording)
+- Use strong action verbs
+- Make bullets results-oriented
+- Embed JD keywords naturally but explicitly
+- Merge weak bullets if needed
+- Add up to 4 bullets ONLY if clearly implied
+
+YOU MUST NOT:
+- Invent tools, skills, companies, metrics, or timelines
+- Add experience not supported by resume text
+- Inflate seniority
+
+FORMAT:
+Return JSON ONLY in the following schema:
 {schema}
 
-STRICT RULES:
-- Use ONLY information present or clearly implied in resume data
-- Rewording and restructuring is REQUIRED (do not return unchanged text)
-- Use professional, ATS-friendly language
-- Use power verbs (developed, implemented, optimized, delivered, etc.)
-- Concise but impactful phrasing
-- If information is missing, leave it empty
-- Ensure valid, parsable JSON
-- Return ONLY JSON
-- Return raw JSON only.
-- Do NOT include explanations, markdown, or code fences.
+STRICT OUTPUT RULES:
+- Use ATS-friendly language
+- Concise, scannable bullets
+- Each bullet ≤ 25 words
+- Valid JSON only
+- No explanations, markdown, or comments
 """
 
 def jd_extraction_prompt(job_description, schema):
     return f"""
-You are extracting structured information from a Job Description.
+You are extracting ATS-WEIGHTED KEYWORDS from a Job Description.
+
+ATS ASSUMPTION:
+- Required skills are hard filters
+- Preferred skills are bonus points
+- Core keywords affect relevance scoring
+- ATS prefers EXACT lexical matches over paraphrases
 
 JOB DESCRIPTION:
 {job_description}
 
 TASK:
-Extract the following:
-- Role / Job title
-- Required technical skills
-- Important ATS keywords (responsibilities, tools, concepts)
+Extract and classify keywords into ATS-weighted groups.
 
-Return JSON in the following format:
+RETURN JSON ONLY in the following format:
 {schema}
 
-RULES:
-- Do NOT invent skills not mentioned in the JD
-- Merge similar skills (e.g., RESTful APIs → REST API)
-- Exclude soft skills unless technical
-- Keep skills concise (1–3 words)
-- Keywords should be role-relevant phrases
-- If something is missing, return empty values
-- Return ONLY valid JSON
-- Return raw JSON only.
-- Do NOT include explanations, markdown, or code fences.
+CLASSIFICATION RULES:
+- REQUIRED SKILLS:
+  - Must-have technical skills or tools
+  - If missing, ATS score drops heavily
+- PREFERRED SKILLS:
+  - Nice-to-have tools or frameworks
+  - Add bonus points if present
+- CORE KEYWORDS:
+  - Responsibilities, architectures, methodologies, concepts
+  - Used for relevance scoring
+
+STRICT RULES:
+- Use EXACT wording from the JD
+- Do NOT invent or infer skills
+- Merge only truly identical terms
+- Exclude soft skills
+- Keep phrases 1–4 words max
+- Valid JSON only
+- No explanations, markdown, or comments
 """
 
+
 def summary_prompt(experience_json, projects_json, skills_list, job_data):
-  return f'''You are generating a NEW professional profile summary and cleaning SKILLS
-for an ATS-optimized resume.
+  return f"""
+You are generating an ATS-OPTIMIZED SUMMARY and SKILLS section.
 
-IMPORTANT:
-- Do NOT rewrite or reference any existing summary.
-- Generate a completely NEW summary.
-- Skills must be selected ONLY from the resume skills text.
-- This is a SYNTHESIS + ORGANIZATION task, NOT invention.
+THIS IS AN ATS-FIRST TASK, NOT A HUMAN-FIRST TASK.
 
-SOURCE OF TRUTH (STRICT):
-- Experience and project data = FACTS (must not change)
-- Resume skills text = ONLY allowed skills
-- Job description = role focus and relevance guidance ONLY
+SOURCE OF TRUTH:
+- Experience & projects = factual constraints
+- Resume skills list = allowed skill pool
+- Job description = keyword priority ONLY
 
 EXPERIENCE (FACTS):
 {experience_json}
@@ -277,39 +308,37 @@ EXPERIENCE (FACTS):
 PROJECTS (FACTS):
 {projects_json}
 
-RESUME SKILLS (ONLY THESE ARE ALLOWED):
+ALLOWED SKILLS (DO NOT ADD OUTSIDE THESE):
 {skills_list}
 
-JOB DESCRIPTION (for relevance and wording only):
+JOB DESCRIPTION (KEYWORD PRIORITY):
 {job_data}
 
 TASKS:
-1. Generate a NEW 2–3 line ATS-optimized professional summary.
-2. Clean, deduplicate, and organize the resume skills into ATS-friendly categories.
+1. Generate a 2–3 line summary optimized for ATS keyword density.
+2. Reorganize skills to maximize ATS keyword matching.
 
-RULES (MANDATORY):
-- Use ONLY information present in experience, projects, and resume skills
-- Do NOT add new skills, tools, technologies, companies, roles, or experience
-- Do NOT infer skills from the job description
-- Do NOT expand acronyms unless explicitly written
-- Normalize capitalization only (e.g., "rest api" → "REST API")
-- Remove duplicates and clearly irrelevant skills
-- Preserve original meaning of skills
-- Return at most 10 skills per category
-- Align summary language with the job description
-- Professional, concise, impact-focused tone
-- No exaggeration or seniority inflation
-- Do NOT mention years of experience unless explicitly stated
+ATS RULES (MANDATORY):
+- Summary MUST include top JD keywords if supported by resume
+- Skills MUST use exact JD terminology where possible
+- Do NOT aggressively deduplicate JD keywords
+- If a JD keyword exists in skills, ensure it appears verbatim
+- Prefer repetition over elegance
+- No seniority inflation
+- No years unless explicitly stated
+
+SKILLS RULES:
+- Use clear ATS-standard categories (e.g., Programming Languages, Frameworks, Databases, Cloud & DevOps)
+- Max 10 skills per category
+- If category is empty, return empty array
 
 OUTPUT FORMAT (STRICT):
-Return valid JSON in the following format ONLY:
+Return valid JSON ONLY:
 {schema.SUMMARY_SCHEMA}
 
-
-OUTPUT RULES:
-- Skills MUST come only from RESUME SKILLS text
-- If a category has no skills, return an empty array
-- Ensure valid, parsable JSON
+FINAL RULES:
+- Do NOT invent skills
+- Do NOT infer from JD alone
+- Ensure valid JSON
 - Return raw JSON only
-- Do NOT include explanations, markdown, comments, or code fences
-'''
+"""

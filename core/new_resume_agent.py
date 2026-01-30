@@ -16,6 +16,7 @@ class ResumeAgent:
             return {}
 
         prompt = prompts.organize_resume_content(raw_text, passedSchema, section_name, jd, sections["experience_raw"], sections["projects_raw"], sections["skills_raw"])
+        
         response = self.client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
@@ -28,6 +29,8 @@ class ResumeAgent:
 
         output = response.choices[0].message.content
         parsed = utils.safe_json_load(output)
+        
+        # print(f"{section_name}: {parsed}")
 
         if parsed is not None:
             return parsed
@@ -37,8 +40,6 @@ class ResumeAgent:
     def run(self, resume_text, jd):
         normalized = self.normalize(resume_text)
         sections = self.split(normalized)
-        
-        # return {"sections": sections}
         
         # From JD
         personal = self.structure_section(sections,

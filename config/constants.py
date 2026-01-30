@@ -33,4 +33,4 @@ Ownership mindset — this app is a live business
 ❌ Not for freelancers juggling multiple clients
 ❌ Not a “just tell me what to code” role'''
 
-constJdOutput = {'company': 'ABS Fresh', 'role': 'Developer', 'required_skills': ['Flutter', 'Firebase', 'Node.js', 'MongoDB', 'SQL', 'REST API', 'analytics'], 'keywords': ['technical ownership', 'app maintenance', 'stability', 'performance', 'business logic', 'feature improvement', 'data tracking', 'analytics support']}
+constJdOutput = {'company': 'bixware', 'role': 'Python Developer', 'required_skills': ['Python', 'FastAPI', 'MS SQL Server', 'Git', 'debugging', 'problem-solving', 'support-driven development'], 'preferred_skills': ['RESTful APIs', 'JavaScript'], 'core_keywords': ['application support', 'production issues', 'application performance', 'existing codebases']}

@@ -1,4 +1,5 @@
 import os
+from dotenv import load_dotenv
 from openai import OpenAI
 from fastapi import FastAPI, File, UploadFile, Form, HTTPException
 
@@ -7,9 +8,10 @@ from utils import text_extract_from_pdf as textFormat, utils
 from services import openai_services as services
 
 from core import new_resume_agent as resumeAgent, job_description_agent as jdAgent
+# uv run uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 
-# # Load environment variables from .env file
-# load_dotenv() 
+# Load environment variables from .env file
+load_dotenv() 
 
 # Initialize FastAPI app
 app = FastAPI()
@@ -116,7 +118,7 @@ async def get_pdf_content(
         jobAgent = jdAgent.JobDescriptionAgent(llm_client=client)
         job_json = jobAgent.run(job_description)
         
-        # Resume Part    
+        # Resume Part
         resume = resumeAgent.ResumeAgent(llm_client=client)
         return resume.run(text, job_json)
         
