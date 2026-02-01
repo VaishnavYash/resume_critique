@@ -85,8 +85,8 @@ TEMPERATURES = {
     "personal": 0.0,
     "education": 0.0,
     "skills": 0.0,
-    "experience": 0.2,
-    "projects": 0.2,
+    "experience": 0.3,
+    "projects": 0.3,
     "summary": 0.4,
     "achievement":0.0
 }

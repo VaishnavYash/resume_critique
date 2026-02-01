@@ -95,8 +95,16 @@ Rules:
 - Do NOT omit any section
 - If information is missing, infer conservatively
 
-Target Job Role:
-{job_json}
+  ATS KEYWORDS (HIGH PRIORITY):
+  Required Skills:
+  {job_json.get("required_skills", [])}
+
+  Core Keywords:
+  {job_json.get("core_keywords", [])}
+
+  Preferred Skills (use only if implied):
+  {job_json.get("preferred_skills", [])}
+  
 
 RESUME CONTENT:
 {resume_text}
@@ -294,51 +302,53 @@ STRICT RULES:
 def summary_prompt(experience_json, projects_json, skills_list, job_data):
   return f"""
 You are generating an ATS-OPTIMIZED SUMMARY and SKILLS section.
-
-THIS IS AN ATS-FIRST TASK, NOT A HUMAN-FIRST TASK.
+This is an ATS-FIRST task. Human readability is secondary.
 
 SOURCE OF TRUTH:
-- Experience & projects = factual constraints
-- Resume skills list = allowed skill pool
-- Job description = keyword priority ONLY
+- Experience & projects = facts
+- Resume skills list = complete allowed skills
+- Job description = keyword terminology only
 
-EXPERIENCE (FACTS):
+EXPERIENCE:
 {experience_json}
 
-PROJECTS (FACTS):
+PROJECTS:
 {projects_json}
 
-ALLOWED SKILLS (DO NOT ADD OUTSIDE THESE):
+ALLOWED SKILLS (MUST ALL BE PRESERVED):
 {skills_list}
 
-JOB DESCRIPTION (KEYWORD PRIORITY):
+JOB DESCRIPTION (KEYWORDS):
 {job_data}
 
-TASKS:
-1. Generate a 2–3 line summary optimized for ATS keyword density.
-2. Reorganize skills to maximize ATS keyword matching.
+OBJECTIVE:
+Maximize ATS keyword match WITHOUT removing, renaming, or collapsing any existing skill.
 
-ATS RULES (MANDATORY):
-- Summary MUST include top JD keywords if supported by resume
-- Skills MUST use exact JD terminology where possible
-- Do NOT aggressively deduplicate JD keywords
-- If a JD keyword exists in skills, ensure it appears verbatim
+RULES (CRITICAL):
+- Every hard skill in ALLOWED SKILLS MUST appear in output
+- Do NOT add or remove skills
+- Do NOT replace hard skills with soft skills
+- Use exact JD wording when available
+- Preserve or increase keyword frequency
 - Prefer repetition over elegance
-- No seniority inflation
-- No years unless explicitly stated
 
-SKILLS RULES:
-- Use clear ATS-standard categories (e.g., Programming Languages, Frameworks, Databases, Cloud & DevOps)
-- Max 10 skills per category
-- If category is empty, return empty array
+SUMMARY:
+- 2–3 lines
+- Use ONLY supported technologies
+- No years, seniority, or invented claims
 
-OUTPUT FORMAT (STRICT):
-Return valid JSON ONLY:
+SKILLS:
+- Use ATS-standard categories only
+- Do NOT merge or deduplicate distinct skills
+- Max 12 skills per category
+- Empty array if none apply
+
+OUTPUT:
+Return VALID JSON ONLY in this structure:
 {schema.SUMMARY_SCHEMA}
 
-FINAL RULES:
-- Do NOT invent skills
-- Do NOT infer from JD alone
-- Ensure valid JSON
-- Return raw JSON only
+FINAL:
+- No invented skills
+- No JD-only inference
+- Raw JSON only
 """
