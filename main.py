@@ -1,5 +1,5 @@
 import os
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 from openai import OpenAI
 from fastapi import FastAPI, File, UploadFile, Form, HTTPException
 
@@ -11,7 +11,7 @@ from core import new_resume_agent as resumeAgent, job_description_agent as jdAge
 # uv run uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 
 # Load environment variables from .env file
-load_dotenv() 
+# load_dotenv() 
 
 # Initialize FastAPI app
 app = FastAPI()
