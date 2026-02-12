@@ -1,5 +1,5 @@
 import os
-# from dotenv import load_dotenv
+from dotenv import load_dotenv
 from openai import OpenAI
 from fastapi import FastAPI, File, UploadFile, Form, HTTPException, Request
 
@@ -23,7 +23,7 @@ def user_key(request):
 limiter = Limiter(key_func=user_key)
 
 # Load environment variables from .env file
-# load_dotenv()
+load_dotenv()
 
 # Initialize FastAPI app
 app = FastAPI()
@@ -174,3 +174,10 @@ async def get_pdf_content(
                 "details": str(e)
             }
         )
+        
+@app.get("/is_backend_working")
+async def isBackendWorking():
+    return {
+        "status": "success",
+        "message": "Backend is Working"
+    }
